@@ -8,12 +8,12 @@ st.title("🔮 Astro Coach – AI-Based Market Trend & Conversion Analysis")
 
 # Load data
 
-daily_demand = pd.read_csv("D:\IIT Ropar\Project_Final\data\processed\daily_premium_demand.csv")
-forecast = pd.read_csv("D:\IIT Ropar\Project_Final/data/processed/premium_demand_forecast.csv")
-feature_importance = pd.read_csv("D:\IIT Ropar\Project_Final/data/processed/conversion_feature_importance.csv")
-user_features = pd.read_csv("D:\IIT Ropar\Project_Final/data/processed/user_conversion_scores.csv")
-churn_scores = pd.read_csv("D:\IIT Ropar\Project_Final/data/processed/premium_churn_scores.csv")
-churn_importance = pd.read_csv("D:\IIT Ropar\Project_Final/data/processed/churn_feature_importance.csv")
+daily_demand = pd.read_csv("./data/processed/daily_premium_demand.csv")
+forecast = pd.read_csv("./data/processed/premium_demand_forecast.csv")
+feature_importance = pd.read_csv("./data/processed/conversion_feature_importance.csv")
+user_features = pd.read_csv("./data/processed/user_conversion_scores.csv")
+churn_scores = pd.read_csv("./data/processed/premium_churn_scores.csv")
+churn_importance = pd.read_csv("./data/processed/churn_feature_importance.csv")
 
 # -------------------------------
 # SECTION 1: Market Trend
