@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # PAGE CONFIG
 # -------------------------------------------------
 st.set_page_config(
-    page_title="Astro Coach – AI Decision Intelligence",
+    page_title="Astro Coach Dashboard – AI Decision Intelligence",
     layout="wide"
 )
 
@@ -29,7 +29,7 @@ st.markdown(
 # -------------------------------------------------
 # TITLE
 # -------------------------------------------------
-st.title("🔮 Astro Coach – AI Decision Intelligence Platform")
+st.title("🔮 Astro Coach Dashboard – AI Decision Intelligence Platform")
 st.caption("Market Trend Analysis • Conversion Intelligence • Churn Risk Management")
 
 # -------------------------------------------------
@@ -107,7 +107,7 @@ targeted_lift_pct = (conversion_lift - 1) * 100
 # -------------------------------------------------
 # SIDEBAR NAVIGATION
 # -------------------------------------------------
-st.sidebar.title(" Astro Coach Navigation")
+st.sidebar.title(" Astro Coach Dashboard")
 
 section = st.sidebar.radio(
     "Select View",
@@ -172,7 +172,7 @@ with st.sidebar.expander("📘 Business Insights Guide"):
     elif guide_step == "Strategic Impact":
         st.markdown(
             """
-            With this system, Astro Coach can:
+            With this system, Astro Coach Dashboard can:
             - Reduce acquisition cost  
             - Protect recurring revenue  
             - Run smarter, data-led campaigns  
@@ -822,4 +822,4 @@ st.markdown(
 )
 
 st.markdown("---")
-st.caption("Astro Coach – AI Decision Intelligence Platform")
+st.caption("Astro Coach Dashboard – AI Decision Intelligence Platform")

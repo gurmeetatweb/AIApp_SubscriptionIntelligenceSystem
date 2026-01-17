@@ -1,4 +1,4 @@
-# Astro Coach — AI Decision Intelligence Platform  
+# Astro Coach Dashboard — AI Decision Intelligence Platform  
 **AI-Driven Subscription Intelligence System**
 
 ---
@@ -7,7 +7,7 @@
 
 This project delivers an **AI-powered Decision Intelligence Platform** for **Astro Coach**, a freemium mobile application offering astrology services.
 
-Unlike traditional analytics dashboards that only report historical performance, Astro Coach transforms data into **actionable business decisions** by combining:
+Unlike traditional analytics dashboards that only report historical performance, Astro Coach Dashboard transforms data into **actionable business decisions** by combining:
 
 - Predictive analytics  
 - Behavioral intelligence  
@@ -106,7 +106,7 @@ All models use time-aware train–validation splits to ensure realistic, forward
 
 ## 7. Decision Intelligence Layer
 
-Beyond predictions, Astro Coach introduces a **Decision Intelligence layer** that supports leadership thinking through:
+Beyond predictions, Astro Coach Dashboard introduces a **Decision Intelligence layer** that supports leadership thinking through:
 
 - **Targeting Simulator** – selects optimal free-user segments for campaigns  
 - **Event Impact Simulator** – evaluates how changes in user behavior affect conversions  
@@ -164,8 +164,7 @@ astro-coach-ai/
 │       └── churn_feature_importance.csv
 │
 ├── notebooks/
-│   ├── data.ipynb           # Data preparation & EDA
-│   └── model.ipynb          # Model development & training
+│   └── data.ipynb           # Data preparation & EDA
 │
 ├── app/
 │   └── streamlit_app.py     # Decision intelligence dashboard
@@ -206,6 +205,6 @@ This project prioritizes:
 - **Decision support over automation**  
 - **End-to-end AI lifecycle execution**  
 
-Astro Coach is designed as a **leadership enablement platform**, not merely a predictive model.
+Astro Coach Dashboard is designed as a **leadership enablement platform**, not merely a predictive model.
 
 The project reflects concepts covered across data preparation, feature engineering, supervised learning, time-series modeling, and AI evaluation.
