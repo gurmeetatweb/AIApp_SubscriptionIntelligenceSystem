@@ -54,6 +54,56 @@ def compute_confidence(num_features):
     coverage = min(1.0, num_features / 5)
     return round((0.5 + 0.5 * coverage) * 100, 1)
 
+# --- Conversion metric ---
+high_intent_threshold = 0.7
+
+# --- Freemium users only ---
+freemium_users = user_features[user_features["isPremiumUserFlag"] == 0]
+
+# Baseline average conversion probability
+baseline_avg_prob = freemium_users["conversion_probability"].mean()
+
+# High-intent users (reuse threshold)
+high_intent_users = freemium_users[
+    freemium_users["conversion_probability"] >= high_intent_threshold
+]
+
+high_intent_avg_prob = high_intent_users["conversion_probability"].mean()
+
+# Conversion lift (safe proxy)
+conversion_lift = (
+    high_intent_avg_prob / baseline_avg_prob
+    if baseline_avg_prob > 0 else 0
+)
+
+# --- Churn metric ---
+churn_risk_threshold = 0.6
+
+# Ensure churn_scores has premium flag
+churn_enriched = churn_scores.merge(
+    user_features[["user_id", "isPremiumUserFlag"]],
+    on="user_id",
+    how="left"
+)
+churn_risk_threshold = 0.6  # keep consistent with your model logic
+
+premium_users = churn_enriched[
+    churn_enriched["isPremiumUserFlag"] == 1
+]
+
+if len(premium_users) > 0:
+    high_risk_users = premium_users[
+        premium_users["churn_probability"] >= churn_risk_threshold
+    ]
+
+    churn_risk_pct = (len(high_risk_users) / len(premium_users)) * 100
+else:
+    churn_risk_pct = 0
+
+# --- Acquisition efficiency proxy ---
+targeted_lift_pct = (conversion_lift - 1) * 100
+
+
 # -------------------------------------------------
 # SIDEBAR NAVIGATION
 # -------------------------------------------------
@@ -89,44 +139,44 @@ with st.sidebar.expander("📘 Business Insights Guide"):
     if guide_step == "Business Challenge":
         st.markdown(
             """
-        Astro Coach operates in a freemium model where success depends on:
-        - Converting free users  
-        - Retaining premium users  
-        - Timing campaigns effectively  
+            Astro Coach operates in a freemium model where success depends on:
+            - Converting free users  
+            - Retaining premium users  
+            - Timing campaigns effectively  
 
-        The challenge is turning large volumes of behavior data into
-        **actionable business decisions**.
-        """
+            The challenge is turning large volumes of behavior data into
+            **actionable business decisions**.
+            """
         )
 
     elif guide_step == "Key Analytical Findings":
         st.markdown(
             """
-        Analysis shows:
-        - Not all engagement leads to revenue  
-        - Intent-driven actions predict conversion  
-        - Disengagement predicts churn before expiry  
-        """
+            Analysis shows:
+            - Not all engagement leads to revenue  
+            - Intent-driven actions predict conversion  
+            - Disengagement predicts churn before expiry  
+            """
         )
 
     elif guide_step == "AI-Driven Solution":
         st.markdown(
             """
-        The AI system introduces:
-        - Demand forecasting with LSTM  
-        - Conversion modeling for targeted growth  
-        - Churn prediction for proactive retention  
-        """
+            The AI system introduces:
+            - Demand forecasting with LSTM  
+            - Conversion modeling for targeted growth  
+            - Churn prediction for proactive retention  
+            """
         )
 
     elif guide_step == "Strategic Impact":
         st.markdown(
             """
-        With this system, Astro Coach can:
-        - Reduce acquisition cost  
-        - Protect recurring revenue  
-        - Run smarter, data-led campaigns  
-        """
+            With this system, Astro Coach can:
+            - Reduce acquisition cost  
+            - Protect recurring revenue  
+            - Run smarter, data-led campaigns  
+            """
         )
 
 # -------------------------------------------------
@@ -135,7 +185,7 @@ with st.sidebar.expander("📘 Business Insights Guide"):
 if section == "Executive Overview":
     st.header("📊 Executive Overview")
     st.caption(
-    "A consolidated view of demand outlook, revenue levers, and risk signals for leadership decision-making."
+        "A consolidated view of demand outlook, revenue levers, and risk signals for leadership decision-making."
     )
 
     col1, col2, col3 = st.columns(3)
@@ -153,15 +203,71 @@ if section == "Executive Overview":
             int(forecast["predicted_premium_subscriptions"].sum())
         )
 
-    st.markdown(
-        """
-    ### What this platform delivers
-    - **Forecasts** premium demand to guide campaign timing  
-    - **Identifies** free users most likely to convert  
-    - **Flags** premium users at risk of churn  
-    - **Transforms analytics into action** through simulations  
-    """
+    st.markdown("### 🎯 Decision Focus")
+    st.caption("Select the primary business objective to surface the most relevant insights.")
+
+    business_focus = st.radio(
+        "What is your current business priority?",
+        (
+            "Improve freemium → premium conversion",
+            "Reduce churn / non-payment risk",
+            "Reduce acquisition cost"
+        ),
+        horizontal=True
     )
+
+    st.markdown("---")
+
+    if business_focus == "Improve freemium → premium conversion":
+        st.markdown("#### 🔍 Conversion Opportunity")
+
+        st.metric(
+            label="High-Intent User Conversion Lift",
+            value=f"{conversion_lift:.1f}×",
+            delta="vs average users"
+        )
+
+        st.info(
+            "Users exhibiting high-intent behaviors convert significantly better than "
+            "the general freemium population."
+        )
+
+        st.success("**Recommended next view:** Conversion Intelligence → High-Intent User Targeting")
+
+
+    elif business_focus == "Reduce churn / non-payment risk":
+        st.markdown("#### ⚠️ Churn Risk Signal")
+
+        st.metric(
+                label="Premium Users at High Churn Risk",
+                value=f"{churn_risk_pct:.1f}%",
+                delta="require proactive retention"
+            )
+
+        st.warning(
+                "A segment of premium users shows elevated churn risk based on "
+                "recent disengagement patterns."
+            )
+
+        st.success("**Recommended next view:** Churn Early Warning → At-Risk Premium Users")
+
+
+    elif business_focus == "Reduce acquisition cost":
+        st.markdown("#### 📉 Acquisition Efficiency")
+
+        st.metric(
+            label="Targeted Campaign Efficiency",
+            value=f"+{(conversion_lift - 1) * 100:.0f}%",
+            delta="higher conversion potential"
+        )
+
+        st.info(
+            "Targeting high-intent user segments can significantly improve "
+            "campaign efficiency and reduce acquisition spend."
+        )
+
+        st.success("**Recommended next view:** Targeting Simulator → Conversion Probability Ranking")
+
 
 # -------------------------------------------------
 # MARKET TREND INTELLIGENCE
@@ -211,30 +317,30 @@ elif section == "Market Trend Intelligence":
 
     st.markdown(
         f"""
-    **Trend Signal:**  
-    {trend_msg}
+        **Trend Signal:**  
+        {trend_msg}
 
-    Use this as a **planning signal**, not a precise forecast.
-    """
+        Use this as a **planning signal**, not a precise forecast.
+        """
     )
 
     st.markdown("## 📌 What this shows")
     st.markdown(
         """
-    This view combines **historical premium demand** with an AI-based forecast
-    to indicate the likely **direction of near-term growth**.
-    """
+        This view combines **historical premium demand** with an AI-based forecast
+        to indicate the likely **direction of near-term growth**.
+        """
     )
 
     st.markdown("## 💡 Why this matters")
     st.markdown(
         """
-    While exact numbers may vary, understanding the **trend direction**
-    helps leadership make better decisions on:
-    - Campaign timing  
-    - Resource planning  
-    - Budget allocation  
-    """
+        While exact numbers may vary, understanding the **trend direction**
+        helps leadership make better decisions on:
+        - Campaign timing  
+        - Resource planning  
+        - Budget allocation  
+        """
     )
 
     
@@ -244,7 +350,7 @@ elif section == "Market Trend Intelligence":
 elif section == "Conversion Intelligence":
     st.header("🎯 Conversion Intelligence")
     st.caption(
-    "Negative drivers represent behaviors correlated with engagement but not purchase intent."
+        "Negative drivers represent behaviors correlated with engagement but not purchase intent."
     )
 
     top_n = st.slider("Top drivers to analyze", 5, 15, 10)
@@ -276,26 +382,26 @@ elif section == "Conversion Intelligence":
     st.markdown("## 📌 What this shows")
     st.markdown(
         """
-    This analysis identifies which user actions represent **real purchase intent** 
-    versus general app usage.
-    """
+        This analysis identifies which user actions represent **real purchase intent** 
+        versus general app usage.
+        """
     )
     st.markdown("## 💡 Why this matters")
     st.markdown(
         """
-    Not all engagement leads to revenue.  
-    This view helps the business **separate activity from intent**, ensuring that
-    marketing and product investments focus on actions that truly drive conversion.
-    """
+        Not all engagement leads to revenue.  
+        This view helps the business **separate activity from intent**, ensuring that
+        marketing and product investments focus on actions that truly drive conversion.
+        """
     )
     st.markdown("## 🚀 Recommended growth actions")
     st.markdown(
         """
-    **How the business can use this**
-    - Design onboarding flows around **high-intent actions**  
-    - Trigger offers when these behaviors occur  
-    - Track them as **leading indicators of revenue growth**  
-    """
+        **How the business can use this**
+        - Design onboarding flows around **high-intent actions**  
+        - Trigger offers when these behaviors occur  
+        - Track them as **leading indicators of revenue growth**  
+        """
     )
 
 
@@ -340,25 +446,25 @@ elif section == "Targeting Simulator":
     st.markdown("## 📌 What this shows")
     st.markdown(
         """
-    This list identifies **free users with the highest likelihood of converting**
-    based on behavioral patterns.
-    """
+        This list identifies **free users with the highest likelihood of converting**
+        based on behavioral patterns.
+        """
     )
     st.markdown("## 💡 Why this matters")
     st.markdown(
         """
-    Instead of mass campaigns, the business can now practice
-    **precision targeting**, improving ROI and reducing acquisition cost.
-    """
+        Instead of mass campaigns, the business can now practice
+        **precision targeting**, improving ROI and reducing acquisition cost.
+        """
     )
     st.markdown("## 🎯 Recommended growth actions")
     st.markdown(
         """
-    **How the business can use this**
-    - Run **personalized upgrade offers** for this group  
-    - Prioritize them in sales and CRM workflows  
-    - Measure conversion uplift from **AI-guided targeting**  
-    """
+        **How the business can use this**
+        - Run **personalized upgrade offers** for this group  
+        - Prioritize them in sales and CRM workflows  
+        - Measure conversion uplift from **AI-guided targeting**  
+        """
     )
 
 
@@ -397,27 +503,27 @@ elif section == "Churn Early Warning":
     st.markdown("## 📌 What this shows")
     st.markdown(
         """
-    This chart highlights the **user behaviors most strongly associated with churn risk**.
-    Higher values indicate actions that frequently occur before premium users stop renewing.
-    """
+        This chart highlights the **user behaviors most strongly associated with churn risk**.
+        Higher values indicate actions that frequently occur before premium users stop renewing.
+        """
     )
     st.markdown("## 💡 Why this matters")
     st.markdown(
         """
-    These signals act as an **early warning system**.  
-    Instead of waiting for cancellations, the business can now:
-    - Detect disengagement patterns early  
-    - Intervene before revenue is lost  
-    """
+        These signals act as an **early warning system**.  
+        Instead of waiting for cancellations, the business can now:
+        - Detect disengagement patterns early  
+        - Intervene before revenue is lost  
+        """
     )
     st.markdown("## 🛡️ Recommended retention actions")
     st.markdown(
         """
-    **How the business can use this**
-    - Trigger **retention campaigns** when these signals increase  
-    - Alert support teams for **high-risk premium users**  
-    - Monitor these behaviors as **leading churn indicators**  
-    """
+        **How the business can use this**
+        - Trigger **retention campaigns** when these signals increase  
+        - Alert support teams for **high-risk premium users**  
+        - Monitor these behaviors as **leading churn indicators**  
+        """
     )
 
 
@@ -500,49 +606,49 @@ elif section == "Event Impact Simulator":
     if net_impact > 0:
         st.success(
             f"""
-    Improving the selected behaviors by **{uplift}%** could increase overall
-    **conversion likelihood**.
+            Improving the selected behaviors by **{uplift}%** could increase overall
+            **conversion likelihood**.
 
-    This suggests that investing in features or campaigns that promote these
-    actions is likely to generate **measurable revenue uplift**.
-    """
+            This suggests that investing in features or campaigns that promote these
+            actions is likely to generate **measurable revenue uplift**.
+            """
         )
     elif net_impact < 0:
         st.warning(
             """
-    The selected behaviors are associated with **lower conversion impact**.
+            The selected behaviors are associated with **lower conversion impact**.
 
-    Improving these may increase engagement, but they should not be treated
-    as **primary revenue levers**.
-    """
+            Improving these may increase engagement, but they should not be treated
+            as **primary revenue levers**.
+            """
         )
     else:
         st.info(
             """
-    The selected behaviors show **neutral impact** on conversion.
+            The selected behaviors show **neutral impact** on conversion.
 
-    They support engagement but are unlikely to directly influence revenue outcomes.
-    """
+            They support engagement but are unlikely to directly influence revenue outcomes.
+            """
         )
     st.markdown("## 🚀 Suggested Business Actions")
 
     if net_impact > 0:
         st.markdown(
             """
-    **How to use this insight**
-    - Prioritize product changes around **high-impact behaviors**  
-    - Trigger campaigns when these actions occur  
-    - Track these events as **leading revenue indicators**  
-    """
+            **How to use this insight**
+            - Prioritize product changes around **high-impact behaviors**  
+            - Trigger campaigns when these actions occur  
+            - Track these events as **leading revenue indicators**  
+            """
         )
     else:
         st.markdown(
             """
-    **How to use this insight**
-    - Treat these actions as **experience enhancers**, not growth levers  
-    - Avoid heavy spend on campaigns centered only on these behaviors  
-    - Combine them with high-intent signals for better ROI  
-    """
+            **How to use this insight**
+            - Treat these actions as **experience enhancers**, not growth levers  
+            - Avoid heavy spend on campaigns centered only on these behaviors  
+            - Combine them with high-intent signals for better ROI  
+            """
         )
     st.markdown("## 📋 Simulation Details")
 
@@ -632,7 +738,7 @@ elif section == "Churn Impact Simulator":
     ax.set_title("What-If Impact of Improving Selected Behaviors")
     st.pyplot(fig)
     st.caption(
-    "Higher values indicate behaviors commonly observed before non-renewal."
+        "Higher values indicate behaviors commonly observed before non-renewal."
     )
 
     st.markdown("## 📌 What this means")
@@ -640,60 +746,65 @@ elif section == "Churn Impact Simulator":
     if net_effect > 0:
         st.success(
             f"""
-    Improving the selected behaviors by **{uplift}%** could meaningfully
-    **reduce churn risk** among premium users.
+            Improving the selected behaviors by **{uplift}%** could meaningfully
+            **reduce churn risk** among premium users.
 
-    This represents a **direct opportunity to protect recurring revenue**.
-    """
+            This represents a **direct opportunity to protect recurring revenue**.
+            """
         )
     elif net_effect < 0:
         st.warning(
                 """
-        The selected behaviors show **limited impact on churn reduction**.
+                The selected behaviors show **limited impact on churn reduction**.
 
-        Improving them may enhance experience, but they are not strong
-        **retention drivers**.
-        """ 
+                Improving them may enhance experience, but they are not strong
+                **retention drivers**.
+                """ 
             )
     else:
         st.info(
                 """
-        The selected behaviors have **neutral effect** on churn.
+                The selected behaviors have **neutral effect** on churn.
 
-        They support usage but are unlikely to materially change renewal outcomes.
-        """
+                They support usage but are unlikely to materially change renewal outcomes.
+                """
             )
     st.markdown("## 🛡️ Suggested Retention Actions")
 
     if net_effect > 0:
         st.markdown(
             """
-    **How to use this insight**
-    - Trigger loyalty offers when these behaviors decline  
-    - Build retention journeys around these actions  
-    - Monitor them as **early churn-warning signals**  
-    """
+            **How to use this insight**
+            - Trigger loyalty offers when these behaviors decline  
+            - Build retention journeys around these actions  
+            - Monitor them as **early churn-warning signals**  
+            """
         )
     else:
         st.markdown(
             """
-    **How to use this insight**
-    - Use these behaviors to improve satisfaction  
-    - Do not rely on them alone for churn prevention  
-    - Combine with pricing, support, and lifecycle strategies  
-    """
+            **How to use this insight**
+            - Use these behaviors to improve satisfaction  
+            - Do not rely on them alone for churn prevention  
+            - Combine with pricing, support, and lifecycle strategies  
+            """
         )
     st.markdown("## 📋 Simulation Details")
 
     st.dataframe(
         selected_df[["feature", "coefficient", "simulated_impact"]]
-        .rename(columns={
-            "feature": "Behavior",
-            "coefficient": "Churn Risk Driver",
-            "simulated_impact": "Simulated Retention Impact"
-        }),
-        use_container_width=True
+            .rename(columns={
+                "feature": "User Behavior",
+                "coefficient": "Churn Signal Strength",
+                "simulated_impact": "Retention Sensitivity"
+            }),
+            use_container_width=True
     )
+    st.caption(
+        "Churn Signal Strength indicates how strongly a behavior is associated with churn risk. "
+        "Retention Sensitivity shows whether improving the behavior meaningfully reduces churn."
+    )
+
 
 
 

@@ -868,7 +868,7 @@ elif section == "Churn Impact Simulator":
     # -------------------------
     # Visualization
     # -------------------------
-    st.subheader("📊 Simulated Retention Impact")
+    st.subheader("📊 Retention Sensitivity")
 
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.barh(

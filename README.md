@@ -62,6 +62,10 @@ To improve interpretability and reduce noise, events are consolidated into **beh
 
 This approach ensures that the AI models focus on **intent**, not just activity volume.
 
+### Feature Engineering Rationale
+
+Event consolidation reduces noise from highly correlated raw events and transforms low-level interactions into meaningful behavioral intent signals. This improves model stability, interpretability, and alignment with real user decision patterns.
+
 ---
 
 ## 5. Modeling Approach
@@ -69,18 +73,38 @@ This approach ensures that the AI models focus on **intent**, not just activity 
 ### 5.1 Conversion Intelligence
 - **Model:** Logistic Regression  
 - **Purpose:** Identify free users with high probability of upgrading  
+**Why Logistic Regression:**  
+Logistic Regression was selected for its high interpretability, allowing leadership teams to clearly understand which behavioral signals increase conversion likelihood. This transparency is critical for trust and for translating model outputs into marketing actions.
 
 ### 5.2 Premium Demand Forecasting
 - **Model:** Time-series forecasting (LSTM for modeling, trend-focused outputs in dashboard)  
 - **Purpose:** Capture short-term demand direction for campaign planning  
+**Why LSTM:**  
+LSTM networks were used to capture temporal dependencies and seasonality in premium demand patterns. However, the dashboard emphasizes **trend direction and inflection points** rather than exact numeric predictions to better support planning and campaign timing decisions.
 
 ### 5.3 Churn Risk Prediction
 - **Model:** Logistic Regression  
 - **Purpose:** Flag premium users showing early disengagement signals  
+**Why Logistic Regression:**  
+For churn risk detection, interpretability and early-warning capability were prioritized over complex black-box models, enabling retention teams to act on understandable disengagement signals.
 
 ---
+## 6. Model Evaluation & Validation Strategy
 
-## 6. Decision Intelligence Layer
+To ensure reliability and business trust, each model was evaluated using metrics aligned to its decision context rather than raw prediction accuracy alone.
+
+### Conversion & Churn Models
+- **ROC-AUC** to evaluate ranking quality for targeting decisions  
+- **Precision–Recall balance** to control false positives in campaigns  
+- **Model coefficients** used as feature importance for explainability  
+
+### Demand Forecasting Model
+- Focus on **trend accuracy** and directional movement rather than point forecasts  
+- **Rolling time-window validation** to preserve temporal order and avoid data leakage  
+
+All models use time-aware train–validation splits to ensure realistic, forward-looking evaluation.
+
+## 7. Decision Intelligence Layer
 
 Beyond predictions, Astro Coach introduces a **Decision Intelligence layer** that supports leadership thinking through:
 
@@ -92,7 +116,7 @@ These modules transform AI outputs into **strategy-testing tools** for business 
 
 ---
 
-## 7. Outputs Generated
+## 8. Outputs Generated
 
 | File | Purpose |
 |------|---------|
@@ -106,7 +130,7 @@ These modules transform AI outputs into **strategy-testing tools** for business 
 
 ---
 
-## 8. Platform Capabilities
+## 9. Platform Capabilities
 
 The Streamlit dashboard includes:
 
@@ -122,7 +146,7 @@ Each module is mapped to a **specific leadership decision**.
 
 ---
 
-## 9. Project Structure
+## 10. Project Structure
 
 ```text
 astro-coach-ai/
@@ -153,7 +177,7 @@ astro-coach-ai/
 
 ---
 
-## 10. How to Run
+## 11. How to Run
 
 ### Install dependencies
 ```bash
@@ -162,12 +186,18 @@ pip install -r requirements.txt
 
 ### Run the Streamlit app
 ```bash
-streamlit run app/streamlit_app.py
+streamlit run app/streamlit_app_v3.py
 ```
 
 ---
+## Limitations & Responsible Use
 
-## 11. Evaluation Philosophy
+- Models are trained on historical behavioral data and may not capture sudden market or user behavior shifts  
+- Forecasts indicate **direction and risk**, not certainty  
+- Outputs are designed as **decision support tools**, not automated decision-makers  
+- Final business actions should always involve human judgment
+
+## 12. Evaluation Philosophy
 
 This project prioritizes:
 
@@ -177,3 +207,5 @@ This project prioritizes:
 - **End-to-end AI lifecycle execution**  
 
 Astro Coach is designed as a **leadership enablement platform**, not merely a predictive model.
+
+The project reflects concepts covered across data preparation, feature engineering, supervised learning, time-series modeling, and AI evaluation.
